@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shamo_frontend/providers/cart_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/cart_card.dart';
 
 class CartPage extends StatelessWidget {
-  const CartPage({Key? key}) : super(key: key);
+  CartPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    CartProvider cartProvider = Provider.of<CartProvider>(context);
     header() {
       return AppBar(
         backgroundColor: backgroundColor1,
@@ -14,7 +17,8 @@ class CartPage extends StatelessWidget {
         elevation: 0,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pop(context);
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/home', (route) => false);
           },
           child: Icon(
             Icons.chevron_left,
@@ -84,14 +88,7 @@ class CartPage extends StatelessWidget {
         padding: EdgeInsets.symmetric(
           horizontal: defaultMargin,
         ),
-        children: [
-          CartCard(),
-          CartCard(),
-          CartCard(),
-          CartCard(),
-          CartCard(),
-          SizedBox(height: 30),
-        ],
+        children: cartProvider.carts.map((cart) => CartCard(cart)).toList(),
       );
     }
 
@@ -114,7 +111,7 @@ class CartPage extends StatelessWidget {
                     style: primaryTextStyle,
                   ),
                   Text(
-                    '\$287,96',
+                    '\$${cartProvider.totalPrice()}',
                     style: priceTextStyle.copyWith(
                       fontWeight: semiBold,
                       fontSize: 16,
@@ -175,8 +172,9 @@ class CartPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: backgroundColor3,
       appBar: header(),
-      body: content(),
-      bottomNavigationBar: customBottomNav(),
+      body: cartProvider.carts.length == 0 ? emptyCart() : content(),
+      bottomNavigationBar:
+          cartProvider.carts.length == 0 ? SizedBox() : customBottomNav(),
     );
   }
 }

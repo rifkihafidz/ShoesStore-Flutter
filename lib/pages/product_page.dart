@@ -1,6 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/product_model.dart';
+import 'package:shamo_frontend/providers/cart_provider.dart';
+import 'package:shamo_frontend/providers/wishlist_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ProductPage extends StatefulWidget {
@@ -33,10 +36,11 @@ class _ProductPageState extends State<ProductPage> {
 
   int currentIndex = 0;
 
-  bool isWishlist = false;
-
   @override
   Widget build(BuildContext context) {
+    WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
+    CartProvider cartProvider = Provider.of<CartProvider>(context);
+
     Future<void> showSuccessDialog() async {
       return showDialog(
         context: context,
@@ -245,24 +249,34 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      setState(() {
-                        isWishlist = !isWishlist;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor:
-                              isWishlist ? secondaryColor : alertColor,
-                          content: Text(
-                            isWishlist
-                                ? 'Items added to wishlist.'
-                                : 'Items removed from wishlist.',
-                            textAlign: TextAlign.center,
+                      wishlistProvider.setProduct(widget.product);
+
+                      if (wishlistProvider.isWishlist(widget.product)) {
+                        // Jika product tidak ada di wishlist
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: secondaryColor,
+                            content: Text(
+                              'Items added to wishlist.',
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        // Jika product ada di wishlist
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: alertColor,
+                            content: Text(
+                              'Items removed from wishlist.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      }
                     },
                     child: Image.asset(
-                      isWishlist
+                      wishlistProvider.isWishlist(widget.product)
                           ? 'assets/button_wishlist_blue.png'
                           : 'assets/button_wishlist.png',
                       width: 46,
@@ -386,6 +400,8 @@ class _ProductPageState extends State<ProductPage> {
                       height: 54,
                       child: TextButton(
                         onPressed: () {
+                          cartProvider.addCart(widget.product);
+
                           showSuccessDialog();
                         },
                         style: TextButton.styleFrom(
