@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ChatBubble extends StatelessWidget {
   final String text;
   final bool isSender;
-  final bool hasProduct;
+  final ProductModel product;
 
   const ChatBubble({
     this.text = '',
     this.isSender = false,
-    this.hasProduct = false,
+    required this.product,
     Key? key,
   }) : super(key: key);
 
@@ -36,8 +37,8 @@ class ChatBubble extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/image_shoes.png',
+                  child: Image.network(
+                    product.galleries![0].url!,
                     width: 70,
                   ),
                 ),
@@ -47,13 +48,13 @@ class ChatBubble extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'COURT VISION 2.0 SHOES',
+                        product.name!,
                         style: primaryTextStyle,
                         // overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '\$57,15',
+                        '\$${product.price}',
                         style: priceTextStyle.copyWith(
                           fontWeight: medium,
                         ),
@@ -113,7 +114,7 @@ class ChatBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          hasProduct ? productReview() : Container(),
+          product is UnitializedProductModel ? SizedBox() : productReview(),
           Row(
             mainAxisAlignment:
                 isSender ? MainAxisAlignment.end : MainAxisAlignment.start,

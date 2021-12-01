@@ -4,6 +4,7 @@ import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/providers/wishlist_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 
+// ignore: must_be_immutable
 class WishlistCard extends StatelessWidget {
   ProductModel product;
 
