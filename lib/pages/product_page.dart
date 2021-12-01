@@ -177,7 +177,7 @@ class _ProductPageState extends State<ProductPage> {
             items: widget.product.galleries!
                 .map(
                   (image) => Image.network(
-                    image.url!,
+                    image.url,
                     width: MediaQuery.of(context).size.width,
                     height: 310,
                     fit: BoxFit.cover,
@@ -240,7 +240,7 @@ class _ProductPageState extends State<ProductPage> {
                           ),
                         ),
                         Text(
-                          widget.product.category!.name!,
+                          widget.product.category!.name,
                           style: secondaryTextStyle.copyWith(
                             fontSize: 12,
                           ),

@@ -36,7 +36,7 @@ class CartCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   image: DecorationImage(
                     image: NetworkImage(
-                      cart.product!.galleries![0].url!,
+                      cart.product.galleries![0].url,
                     ),
                   ),
                 ),
@@ -47,14 +47,14 @@ class CartCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      cart.product!.name!,
+                      cart.product.name!,
                       style: primaryTextStyle.copyWith(
                         fontWeight: semiBold,
                       ),
                     ),
                     SizedBox(height: 2),
                     Text(
-                      '\$${cart.product!.price}',
+                      '\$${cart.product.price}',
                       style: priceTextStyle,
                     ),
                   ],
@@ -64,7 +64,7 @@ class CartCard extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      cartProvider.addQuantity(cart.id!);
+                      cartProvider.addQuantity(cart.id);
                     },
                     child: Image.asset(
                       'assets/button_add.png',
@@ -81,7 +81,7 @@ class CartCard extends StatelessWidget {
                   SizedBox(height: 2),
                   GestureDetector(
                     onTap: () {
-                      cartProvider.removeQuantity(cart.id!);
+                      cartProvider.removeQuantity(cart.id);
                     },
                     child: Image.asset(
                       'assets/button_min.png',
@@ -95,7 +95,7 @@ class CartCard extends StatelessWidget {
           SizedBox(height: 12),
           GestureDetector(
             onTap: () {
-              cartProvider.removeCart(cart.id!);
+              cartProvider.removeCart(cart.id);
             },
             child: Row(
               children: [

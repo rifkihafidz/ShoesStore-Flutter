@@ -14,7 +14,7 @@ class CartProvider with ChangeNotifier {
 
   // Cek apakah product ada di dalam cart
   productExist(ProductModel product) {
-    if (_carts.indexWhere((element) => element.product!.id == product.id) ==
+    if (_carts.indexWhere((element) => element.product.id == product.id) ==
         -1) {
       // Product tidak ada di cart
       return false;
@@ -28,8 +28,8 @@ class CartProvider with ChangeNotifier {
     if (productExist(product)) {
       // Jika product ada di cart, tambahkan quantity
       int index =
-          _carts.indexWhere((element) => element.product!.id == product.id);
-      _carts[index].quantity = (_carts[index].quantity ?? 0) + 1;
+          _carts.indexWhere((element) => element.product.id == product.id);
+      _carts[index].quantity += 1;
     } else {
       // Jika product tidak ada di cart, tambahkan product ke cart
       _carts.add(
@@ -49,12 +49,12 @@ class CartProvider with ChangeNotifier {
   }
 
   addQuantity(int id) {
-    _carts[id].quantity = _carts[id].quantity! + 1;
+    _carts[id].quantity = _carts[id].quantity + 1;
     notifyListeners();
   }
 
   removeQuantity(int id) {
-    _carts[id].quantity = _carts[id].quantity! - 1;
+    _carts[id].quantity = _carts[id].quantity - 1;
 
     if (_carts[id].quantity == 0) {
       // Jika quantity product di cart sudah 0, remove product dari cart
@@ -66,7 +66,7 @@ class CartProvider with ChangeNotifier {
   totalItems() {
     int total = 0;
     for (var item in _carts) {
-      total += item.quantity!;
+      total += item.quantity;
     }
     return total;
   }
@@ -74,7 +74,7 @@ class CartProvider with ChangeNotifier {
   totalPrice() {
     double total = 0;
     for (var item in _carts) {
-      total += (item.quantity! * item.product!.price!);
+      total += (item.quantity * item.product.price!);
     }
     return total;
   }

@@ -1,14 +1,14 @@
 import 'package:shamo_frontend/models/product_model.dart';
 
 class CartModel {
-  int? id;
-  ProductModel? product;
-  int? quantity;
+  late int id;
+  late ProductModel product;
+  late int quantity;
 
   CartModel({
-    this.id,
-    this.product,
-    this.quantity,
+    required this.id,
+    required this.product,
+    required this.quantity,
   });
 
   CartModel.fromJson(Map<String, dynamic> json) {
@@ -20,12 +20,12 @@ class CartModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'product': product!.toJson(),
+      'product': product.toJson(),
       'quantity': quantity,
     };
   }
 
   double getTotalPrice() {
-    return product!.price! * quantity!;
+    return product.price! * quantity;
   }
 }

@@ -29,7 +29,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         isLoading = true;
       });
 
-      if (await transactionProvider.checkOut(authProvider.user.token!,
+      if (await transactionProvider.checkOut(authProvider.user.token,
           cartProvider.carts, cartProvider.totalPrice())) {
         cartProvider.carts = [];
         Navigator.pushNamedAndRemoveUntil(

@@ -24,7 +24,7 @@ class ProductModel {
     this.galleries,
   });
 
-  ProductModel.fromJson(Map<String?, dynamic> json) {
+  ProductModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     price = double.parse(json['price'].toString());

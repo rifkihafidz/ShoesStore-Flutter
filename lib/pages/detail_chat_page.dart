@@ -108,7 +108,7 @@ class _DetailChatPageState extends State<DetailChatPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                widget.product.galleries![0].url!,
+                widget.product.galleries![0].url,
                 width: 54,
               ),
             ),
@@ -152,7 +152,7 @@ class _DetailChatPageState extends State<DetailChatPage> {
     Widget content() {
       return StreamBuilder<List<MessageModel>>(
           stream: MessageService()
-              .getMessagesByUserId(userId: authProvider.user.id!),
+              .getMessagesByUserId(userId: authProvider.user.id),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ListView(
