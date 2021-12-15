@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shamo_frontend/pages/cart_page.dart';
 import 'package:shamo_frontend/pages/checkout_page.dart';
 import 'package:shamo_frontend/pages/checkout_success_page.dart';
-import 'package:shamo_frontend/pages/detail_chat_page.dart';
 import 'package:shamo_frontend/pages/edit_profile_page.dart';
 import 'package:shamo_frontend/pages/home/main_page.dart';
 import 'package:shamo_frontend/pages/sign_in_page.dart';

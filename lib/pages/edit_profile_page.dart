@@ -1,16 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/user_model.dart';
+import 'package:shamo_frontend/pages/home/main_page.dart';
 import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends StatefulWidget {
   const EditProfilePage({Key? key}) : super(key: key);
 
+  @override
+  _EditProfilePageState createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  TextEditingController nameController = TextEditingController(text: '');
+
+  TextEditingController usernameController = TextEditingController(text: '');
+
+  TextEditingController emailController = TextEditingController(text: '');
   @override
   Widget build(BuildContext context) {
     AuthProvider authProvider = Provider.of<AuthProvider>(context);
     UserModel user = authProvider.user;
+
+    handleUpdateProfile() async {
+      if (await authProvider.updateProfile(
+        name: nameController.text,
+        email: emailController.text,
+        username: usernameController.text,
+      )) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: secondaryColor,
+            content: Text(
+              'Profile Updated',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => MainPage()),
+            (route) => false);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: alertColor,
+            content: Text(
+              'Failed to Update Profile',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+    }
 
     header() {
       return AppBar(
@@ -34,7 +78,9 @@ class EditProfilePage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              handleUpdateProfile();
+            },
             icon: Icon(
               Icons.check,
               color: primaryColor,
@@ -60,7 +106,7 @@ class EditProfilePage extends StatelessWidget {
             ),
             TextFormField(
               style: primaryTextStyle,
-              initialValue: user.name,
+              controller: nameController..text = user.name,
               decoration: InputDecoration(
                 // hintText: 'Alex Keinnzal',
                 // hintStyle: primaryTextStyle,
@@ -92,7 +138,7 @@ class EditProfilePage extends StatelessWidget {
             ),
             TextFormField(
               style: primaryTextStyle,
-              initialValue: user.username,
+              controller: usernameController..text = user.username,
               decoration: InputDecoration(
                 // hintText: '@alexkeinn',
                 // hintStyle: primaryTextStyle,
@@ -124,7 +170,7 @@ class EditProfilePage extends StatelessWidget {
             ),
             TextFormField(
               style: primaryTextStyle,
-              initialValue: user.email,
+              controller: emailController..text = user.email,
               decoration: InputDecoration(
                 // hintText: 'alex.kein@gmail.com',
                 // hintStyle: primaryTextStyle,

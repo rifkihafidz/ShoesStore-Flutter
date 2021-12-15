@@ -53,4 +53,35 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> logout() async {
+    try {
+      await AuthService().logout();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String email,
+    required String username,
+  }) async {
+    try {
+      UserModel user = await AuthService().updateProfile(
+        name: name,
+        email: email,
+        username: username,
+      );
+
+      _user = user;
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }
