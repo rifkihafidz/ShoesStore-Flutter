@@ -17,7 +17,10 @@ class TransactionService {
     var body = jsonEncode({
       'address': 'Marsemoon',
       'items': carts
-          .map((cart) => {'id': cart.product.id, 'quantity': cart.quantity})
+          .map((cart) => {
+                'id': cart.product.id,
+                'quantity': cart.quantity,
+              })
           .toList(),
       'status': 'PENDING',
       'total_price': totalPrice,

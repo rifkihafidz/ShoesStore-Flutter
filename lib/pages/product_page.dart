@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/pages/detail_chat_page.dart';
+import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/cart_provider.dart';
 import 'package:shamo_frontend/providers/wishlist_provider.dart';
+import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ProductPage extends StatefulWidget {
@@ -41,6 +43,13 @@ class _ProductPageState extends State<ProductPage> {
   Widget build(BuildContext context) {
     WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
     CartProvider cartProvider = Provider.of<CartProvider>(context);
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+
+    handleWishlist() async {
+      var a = await WishlistService()
+          .checkWishlist(user: authProvider.user, product: widget.product);
+      print(a);
+    }
 
     Future<void> showSuccessDialog() async {
       return showDialog(
@@ -250,31 +259,32 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      wishlistProvider.setProduct(widget.product);
+                      handleWishlist();
+                      // wishlistProvider.setProduct(widget.product);
 
-                      if (wishlistProvider.isWishlist(widget.product)) {
-                        // Jika product tidak ada di wishlist
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: secondaryColor,
-                            content: Text(
-                              'Items added to wishlist.',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      } else {
-                        // Jika product ada di wishlist
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: alertColor,
-                            content: Text(
-                              'Items removed from wishlist.',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      }
+                      // if (wishlistProvider.isWishlist(widget.product)) {
+                      //   // Jika product tidak ada di wishlist
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(
+                      //       backgroundColor: secondaryColor,
+                      //       content: Text(
+                      //         'Items added to wishlist.',
+                      //         textAlign: TextAlign.center,
+                      //       ),
+                      //     ),
+                      //   );
+                      // } else {
+                      //   // Jika product ada di wishlist
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     SnackBar(
+                      //       backgroundColor: alertColor,
+                      //       content: Text(
+                      //         'Items removed from wishlist.',
+                      //         textAlign: TextAlign.center,
+                      //       ),
+                      //     ),
+                      //   );
+                      // }
                     },
                     child: Image.asset(
                       wishlistProvider.isWishlist(widget.product)
