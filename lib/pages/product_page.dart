@@ -5,14 +5,15 @@ import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/pages/detail_chat_page.dart';
 import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/cart_provider.dart';
-import 'package:shamo_frontend/providers/wishlist_provider.dart';
 import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 
+// ignore: must_be_immutable
 class ProductPage extends StatefulWidget {
   final ProductModel product;
+  bool isWishlist;
 
-  ProductPage(this.product, {Key? key}) : super(key: key);
+  ProductPage(this.product, this.isWishlist, {Key? key}) : super(key: key);
 
   @override
   _ProductPageState createState() => _ProductPageState();
@@ -41,14 +42,40 @@ class _ProductPageState extends State<ProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
     CartProvider cartProvider = Provider.of<CartProvider>(context);
     AuthProvider authProvider = Provider.of<AuthProvider>(context);
 
     handleWishlist() async {
-      var a = await WishlistService()
+      var isWishlistExist = await WishlistService()
           .checkWishlist(user: authProvider.user, product: widget.product);
-      print(a);
+      if (isWishlistExist == true) {
+        await WishlistService()
+            .deleteWishlist(user: authProvider.user, product: widget.product);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: alertColor,
+            content: Text(
+              'Item removed from wishlist.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      } else {
+        await WishlistService()
+            .addWishlist(user: authProvider.user, product: widget.product);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: secondaryColor,
+            content: Text(
+              'Items added to wishlist.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      }
+      setState(() {
+        widget.isWishlist = !widget.isWishlist;
+      });
     }
 
     Future<void> showSuccessDialog() async {
@@ -260,34 +287,9 @@ class _ProductPageState extends State<ProductPage> {
                   GestureDetector(
                     onTap: () {
                       handleWishlist();
-                      // wishlistProvider.setProduct(widget.product);
-
-                      // if (wishlistProvider.isWishlist(widget.product)) {
-                      //   // Jika product tidak ada di wishlist
-                      //   ScaffoldMessenger.of(context).showSnackBar(
-                      //     SnackBar(
-                      //       backgroundColor: secondaryColor,
-                      //       content: Text(
-                      //         'Items added to wishlist.',
-                      //         textAlign: TextAlign.center,
-                      //       ),
-                      //     ),
-                      //   );
-                      // } else {
-                      //   // Jika product ada di wishlist
-                      //   ScaffoldMessenger.of(context).showSnackBar(
-                      //     SnackBar(
-                      //       backgroundColor: alertColor,
-                      //       content: Text(
-                      //         'Items removed from wishlist.',
-                      //         textAlign: TextAlign.center,
-                      //       ),
-                      //     ),
-                      //   );
-                      // }
                     },
                     child: Image.asset(
-                      wishlistProvider.isWishlist(widget.product)
+                      widget.isWishlist
                           ? 'assets/button_wishlist_blue.png'
                           : 'assets/button_wishlist.png',
                       width: 46,
@@ -453,5 +455,64 @@ class _ProductPageState extends State<ProductPage> {
         ],
       ),
     );
+
+    // return Scaffold(
+    //   backgroundColor: backgroundColor6,
+    //   body: FutureBuilder(
+    //     future: checkWishlist(),
+    //     builder: (context, snapshot) {
+    // switch (snapshot.connectionState) {
+    //   case ConnectionState.waiting:
+    //     return Center(
+    //       child: CircularProgressIndicator(
+    //         color: primaryColor,
+    //       ),
+    //     );
+    //   case ConnectionState.done:
+    //     return ListView(
+    //       children: [
+    //         header(),
+    //         content(),
+    //       ],
+    //     );
+    //   default:
+    //     return Center(
+    //       child: CircularProgressIndicator(
+    //         color: primaryColor,
+    //       ),
+    //     );
+    // }
+    // },
+    //   ),
+    // );
+    // return Scaffold(
+    //   backgroundColor: backgroundColor6,
+    //   body: StreamBuilder(
+    //     stream: checkWishlist().asStream(),
+    //     builder: (context, snapshot) {
+    //       switch (snapshot.connectionState) {
+    //         // case ConnectionState.waiting:
+    //         //   return Center(
+    //         //     child: CircularProgressIndicator(
+    //         //       color: primaryColor,
+    //         //     ),
+    //         //   );
+    //         case ConnectionState.done:
+    //           return ListView(
+    //             children: [
+    //               header(),
+    //               content(),
+    //             ],
+    //           );
+    //         default:
+    //           return Center(
+    //             child: CircularProgressIndicator(
+    //               color: primaryColor,
+    //             ),
+    //           );
+    //       }
+    //     },
+    //   ),
+    // );
   }
 }

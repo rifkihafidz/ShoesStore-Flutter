@@ -14,7 +14,7 @@ class WishlistService {
         'product': product.toJson(),
         'createdAt': DateTime.now().toString(),
         'updatedAt': DateTime.now().toString(),
-      }).then((value) => print('Product Added to Wishllist.'));
+      });
     } catch (e) {
       throw Exception('Failed Adding Product to Wishlist.');
     }
@@ -38,7 +38,7 @@ class WishlistService {
     }
   }
 
-  Future<bool?> checkWishlist(
+  Future<bool> checkWishlist(
       {required UserModel user, required ProductModel product}) async {
     late bool isExist;
     try {
@@ -56,14 +56,3 @@ class WishlistService {
     return isExist;
   }
 }
-
- //   .get()
-        //   .then((value) {
-        // value.docs.forEach((element) {
-        //   firestore.collection('wishlists').doc(element.id).get().then((value) {
-        //     if (value.exists) {
-        //       return true;
-        //     }
-        //   });
-        // });
-        // return true;

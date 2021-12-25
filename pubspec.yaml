@@ -30,6 +30,7 @@ dependencies:
     sdk: flutter
   # flutter_local_notifications: ^9.1.4
   flutter_secure_storage: ^5.0.2
+  fvm: ^2.2.6
   google_fonts: ^2.1.0
   http: ^0.13.3
   provider: ^6.0.1

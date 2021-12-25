@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/pages/product_page.dart';
+import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ProductTile extends StatelessWidget {
@@ -10,13 +13,20 @@ class ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+    late bool isWishlist;
+    checkWishlist() async {
+      isWishlist = await WishlistService()
+          .checkWishlist(user: authProvider.user, product: product);
+    }
+
     return GestureDetector(
-      onTap: () {
-        // Navigator.pushNamed(context, '/product');
+      onTap: () async {
+        await checkWishlist();
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductPage(product),
+            builder: (context) => ProductPage(product, isWishlist),
           ),
         );
       },
