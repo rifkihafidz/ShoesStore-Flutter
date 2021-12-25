@@ -1,9 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shamo_frontend/models/product_model.dart';
 import 'package:shamo_frontend/models/user_model.dart';
+import 'package:shamo_frontend/models/wishlist_model.dart';
 
 class WishlistService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  Stream<List<WishlistModel>> getWishlistsByUserId({required int userId}) {
+    try {
+      return firestore
+          .collection('wishlists')
+          .where('userId', isEqualTo: userId)
+          .snapshots()
+          .map((QuerySnapshot list) {
+        var result = list.docs.map<WishlistModel>((DocumentSnapshot wishlist) {
+          // print(wishlist.data());
+          print('Ada data');
+
+          return WishlistModel.fromJson(
+              wishlist.data() as Map<String, dynamic>);
+        }).toList();
+
+        result.sort((WishlistModel a, WishlistModel b) =>
+            a.createdAt.compareTo(b.createdAt));
+
+        return result;
+      });
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 
   Future<void> addWishlist(
       {required UserModel user, required ProductModel product}) async {

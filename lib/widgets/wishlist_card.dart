@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/product_model.dart';
-import 'package:shamo_frontend/providers/wishlist_provider.dart';
+import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 
 // ignore: must_be_immutable
@@ -12,7 +13,21 @@ class WishlistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
+
+    deleteWishlist() async {
+      await WishlistService()
+          .deleteWishlist(user: authProvider.user, product: product);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: alertColor,
+          content: Text(
+            'Item removed from wishlist.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
 
     return Container(
       margin: EdgeInsets.only(top: 20),
@@ -56,7 +71,7 @@ class WishlistCard extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              wishlistProvider.setProduct(product);
+              deleteWishlist();
             },
             child: Image.asset(
               'assets/button_wishlist_blue.png',

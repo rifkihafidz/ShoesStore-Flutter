@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shamo_frontend/models/wishlist_model.dart';
+import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/page_provider.dart';
 import 'package:shamo_frontend/providers/wishlist_provider.dart';
+import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/wishlist_card.dart';
 
@@ -11,6 +14,7 @@ class WishlistPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
+    AuthProvider authProvider = Provider.of<AuthProvider>(context);
     PageProvider pageProvider = Provider.of<PageProvider>(context);
 
     Widget header() {
@@ -81,24 +85,42 @@ class WishlistPage extends StatelessWidget {
     }
 
     Widget content() {
-      return Expanded(
-        child: Container(
-          color: backgroundColor3,
-          child: ListView(
-              padding: EdgeInsets.symmetric(
-                horizontal: defaultMargin,
+      return StreamBuilder<List<WishlistModel>>(
+        stream: WishlistService()
+            .getWishlistsByUserId(userId: authProvider.user.id),
+        builder: (context, snapshot) {
+          // print(snapshot.data);
+          if (snapshot.hasData) {
+            if (snapshot.data!.length == 0) {
+              return emptyWishlist();
+            }
+            return Expanded(
+              child: Container(
+                color: backgroundColor3,
+                child: ListView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: defaultMargin,
+                  ),
+                  children: snapshot.data!
+                      .map((WishlistModel wishlist) =>
+                          WishlistCard(wishlist.product))
+                      .toList(),
+                ),
               ),
-              children: wishlistProvider.wishlist
-                  .map((product) => WishlistCard(product))
-                  .toList()),
-        ),
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
       );
     }
 
     return Column(
       children: [
         header(),
-        wishlistProvider.wishlist.length == 0 ? emptyWishlist() : content(),
+        content(),
       ],
     );
   }
