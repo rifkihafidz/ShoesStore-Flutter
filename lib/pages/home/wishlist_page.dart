@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:shamo_frontend/models/wishlist_model.dart';
 import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/page_provider.dart';
-import 'package:shamo_frontend/providers/wishlist_provider.dart';
 import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/wishlist_card.dart';
@@ -13,7 +12,6 @@ class WishlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WishlistProvider wishlistProvider = Provider.of<WishlistProvider>(context);
     AuthProvider authProvider = Provider.of<AuthProvider>(context);
     PageProvider pageProvider = Provider.of<PageProvider>(context);
 

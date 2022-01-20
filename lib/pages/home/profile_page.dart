@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shamo_frontend/models/user_model.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -9,66 +8,72 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-    UserModel user = authProvider.user;
-
     Widget header() {
-      return AppBar(
-        backgroundColor: backgroundColor1,
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        flexibleSpace: SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(
-              defaultMargin,
-            ),
-            child: Row(
-              children: [
-                ClipOval(
-                  child: Image.network(
-                    user.profilePhotoUrl,
-                    width: 64,
+      return BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthInitial) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/sign-in', (route) => false);
+          }
+        },
+        builder: (context, state) {
+          if (state is AuthLoggedIn) {
+            return AppBar(
+              backgroundColor: backgroundColor1,
+              automaticallyImplyLeading: false,
+              elevation: 0,
+              flexibleSpace: SafeArea(
+                child: Container(
+                  padding: EdgeInsets.all(
+                    defaultMargin,
                   ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Hello, ${user.name}',
-                        style: primaryTextStyle.copyWith(
-                          fontWeight: semiBold,
-                          fontSize: 24,
+                      ClipOval(
+                        child: Image.network(
+                          state.user.profilePhotoUrl,
+                          width: 64,
                         ),
                       ),
-                      Text(
-                        '@${user.username}',
-                        style: subtitleTextStyle.copyWith(
-                          fontSize: 16,
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Hello, ${state.user.name}',
+                              style: primaryTextStyle.copyWith(
+                                fontWeight: semiBold,
+                                fontSize: 24,
+                              ),
+                            ),
+                            Text(
+                              '@${state.user.username}',
+                              style: subtitleTextStyle.copyWith(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          context.read<AuthBloc>().add(AuthLogout());
+                        },
+                        child: Image.asset(
+                          'assets/button_exit.png',
+                          width: 20,
                         ),
                       ),
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    if (await authProvider.logout()) {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/sign-in', (route) => false);
-                    } else {
-                      print('Gagal Logout');
-                    }
-                  },
-                  child: Image.asset(
-                    'assets/button_exit.png',
-                    width: 20,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
+            );
+          } else {
+            return SizedBox();
+          }
+        },
       );
     }
 

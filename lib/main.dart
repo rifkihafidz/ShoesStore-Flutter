@@ -1,6 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/pages/cart_page.dart';
 import 'package:shamo_frontend/pages/checkout_page.dart';
 import 'package:shamo_frontend/pages/checkout_success_page.dart';
@@ -9,7 +12,6 @@ import 'package:shamo_frontend/pages/home/main_page.dart';
 import 'package:shamo_frontend/pages/sign_in_page.dart';
 import 'package:shamo_frontend/pages/sign_up_page.dart';
 import 'package:shamo_frontend/pages/splash_page.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/cart_provider.dart';
 import 'package:shamo_frontend/providers/page_provider.dart';
 import 'package:shamo_frontend/providers/product_provider.dart';
@@ -19,6 +21,7 @@ import 'package:shamo_frontend/providers/wishlist_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await GetStorage.init();
   runApp(MyApp());
 }
 
@@ -29,8 +32,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => AuthProvider(),
+        BlocProvider(
+          create: (context) => AuthBloc(),
         ),
         ChangeNotifierProvider(
           create: (context) => ProductProvider(),
