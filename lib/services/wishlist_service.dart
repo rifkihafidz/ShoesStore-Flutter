@@ -14,7 +14,6 @@ class WishlistService {
           .snapshots()
           .map((QuerySnapshot list) {
         var result = list.docs.map<WishlistModel>((DocumentSnapshot wishlist) {
-          // print(wishlist.data());
           print('Ada data');
 
           return WishlistModel.fromJson(

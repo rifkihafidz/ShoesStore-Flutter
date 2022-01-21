@@ -7,7 +7,7 @@ class LocalStorage {
   // Save User Data Locally
   Future<void> saveUserData(UserModel user) {
     try {
-      print('Save User Data: ${user.toJson()}');
+      print('User Data Saved');
       return _storage.write('localUserData', user.toJson());
     } catch (e) {
       throw Exception(e);

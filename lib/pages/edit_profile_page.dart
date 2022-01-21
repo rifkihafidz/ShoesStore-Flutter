@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/pages/home/main_page.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -20,43 +20,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   TextEditingController emailController = TextEditingController(text: '');
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-    UserModel user = authProvider.user;
-
-    handleUpdateProfile() async {
-      if (await authProvider.updateProfile(
-        name: nameController.text,
-        email: emailController.text,
-        username: usernameController.text,
-      )) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: secondaryColor,
-            content: Text(
-              'Profile Updated',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => MainPage()),
-            (route) => false);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: alertColor,
-            content: Text(
-              'Failed to Update Profile',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
-    }
-
-    header() {
+    header(UserModel user) {
       return AppBar(
         leading: IconButton(
           icon: Icon(
@@ -79,7 +43,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         actions: [
           IconButton(
             onPressed: () {
-              handleUpdateProfile();
+              context.read<AuthBloc>().add(AuthUpdateProfile(
+                  name: nameController.text,
+                  email: emailController.text,
+                  username: usernameController.text));
             },
             icon: Icon(
               Icons.check,
@@ -90,7 +57,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
     }
 
-    Widget nameInput() {
+    Widget nameInput(UserModel user) {
       return Container(
         margin: EdgeInsets.only(
           top: defaultMargin,
@@ -122,7 +89,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
     }
 
-    Widget usernameInput() {
+    Widget usernameInput(UserModel user) {
       return Container(
         margin: EdgeInsets.only(
           top: defaultMargin,
@@ -154,7 +121,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
     }
 
-    Widget emailInput() {
+    Widget emailInput(UserModel user) {
       return Container(
         margin: EdgeInsets.only(
           top: defaultMargin,
@@ -186,7 +153,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       );
     }
 
-    Widget content() {
+    Widget content(UserModel user) {
       return Container(
         padding: EdgeInsets.symmetric(
           horizontal: defaultMargin,
@@ -210,19 +177,56 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
             ),
-            nameInput(),
-            usernameInput(),
-            emailInput(),
+            nameInput(user),
+            usernameInput(user),
+            emailInput(user),
           ],
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: backgroundColor3,
-      appBar: header(),
-      body: content(),
-      resizeToAvoidBottomInset: false,
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoggedIn) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: secondaryColor,
+              content: Text(
+                'Profile Updated',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => MainPage()),
+              (route) => false);
+        } else if (state is AuthFailed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: alertColor,
+              content: Text(
+                'Failed to Update Profile',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Scaffold(
+            backgroundColor: backgroundColor3,
+            appBar: header(state.user),
+            body: content(state.user),
+            resizeToAvoidBottomInset: false,
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

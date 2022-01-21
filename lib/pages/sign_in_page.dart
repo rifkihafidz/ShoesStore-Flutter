@@ -162,9 +162,12 @@ class _SignInPageState extends State<SignInPage> {
             margin: EdgeInsets.only(top: 30),
             child: TextButton(
               onPressed: () {
-                context.read<AuthBloc>().add(AuthLogin(
-                    email: emailController.text,
-                    password: passwordController.text));
+                context.read<AuthBloc>().add(
+                      AuthLogin(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      ),
+                    );
               },
               style: TextButton.styleFrom(
                 backgroundColor: primaryColor,

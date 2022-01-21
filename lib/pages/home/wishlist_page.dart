@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/models/wishlist_model.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/page_provider.dart';
 import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
@@ -12,7 +14,6 @@ class WishlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
     PageProvider pageProvider = Provider.of<PageProvider>(context);
 
     Widget header() {
@@ -82,10 +83,9 @@ class WishlistPage extends StatelessWidget {
       );
     }
 
-    Widget content() {
+    Widget content(UserModel user) {
       return StreamBuilder<List<WishlistModel>>(
-        stream: WishlistService()
-            .getWishlistsByUserId(userId: authProvider.user.id),
+        stream: WishlistService().getWishlistsByUserId(userId: user.id),
         builder: (context, snapshot) {
           // print(snapshot.data);
           if (snapshot.hasData) {
@@ -115,11 +115,20 @@ class WishlistPage extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        header(),
-        content(),
-      ],
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Column(
+            children: [
+              header(),
+              content(state.user),
+            ],
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

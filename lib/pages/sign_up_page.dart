@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/loading_button.dart';
 
@@ -25,37 +25,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-
-    handleSignUp() async {
-      setState(() {
-        isLoading = true;
-      });
-
-      if (await authProvider.register(
-        name: nameController.text,
-        username: usernameController.text,
-        email: emailController.text,
-        password: passwordController.text,
-      )) {
-        Navigator.pushNamed(context, '/home');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: alertColor,
-            content: Text(
-              'Registration Failed!',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
-
-      setState(() {
-        isLoading = false;
-      });
-    }
-
     Widget header() {
       return Container(
         margin: EdgeInsets.only(top: defaultMargin),
@@ -273,28 +242,58 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     Widget signUpButton() {
-      return Container(
-        height: 50,
-        width: double.infinity,
-        margin: EdgeInsets.only(top: 30),
-        child: TextButton(
-          onPressed: () {
-            handleSignUp();
-          },
-          style: TextButton.styleFrom(
-            backgroundColor: primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+      return BlocConsumer<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthLoggedIn) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/home', (route) => false);
+          } else if (state is AuthFailed) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: alertColor,
+                content: Text(state.error),
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return Container(
+            height: 50,
+            width: double.infinity,
+            margin: EdgeInsets.only(top: 30),
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  isLoading = true;
+                });
+                context.read<AuthBloc>().add(
+                      AuthRegister(
+                        name: nameController.text,
+                        username: usernameController.text,
+                        email: emailController.text,
+                        password: passwordController.text,
+                      ),
+                    );
+                setState(() {
+                  isLoading = false;
+                });
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Sign Up',
+                style: primaryTextStyle.copyWith(
+                  fontWeight: medium,
+                  fontSize: 16,
+                ),
+              ),
             ),
-          ),
-          child: Text(
-            'Sign Up',
-            style: primaryTextStyle.copyWith(
-              fontWeight: medium,
-              fontSize: 16,
-            ),
-          ),
-        ),
+          );
+        },
       );
     }
 

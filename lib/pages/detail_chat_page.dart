@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/models/message_model.dart';
 import 'package:shamo_frontend/models/product_model.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/services/message_service.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/chat_bubble.dart';
@@ -20,24 +21,22 @@ class DetailChatPage extends StatefulWidget {
 class _DetailChatPageState extends State<DetailChatPage> {
   TextEditingController messageController = TextEditingController(text: '');
 
+  handleAddMessage(UserModel user) async {
+    await MessageService().addMessage(
+      user: user,
+      isFromUser: true,
+      product: widget.product,
+      message: messageController.text,
+    );
+
+    setState(() {
+      widget.product = UnitializedProductModel();
+      messageController.text = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-
-    handleAddMessage() async {
-      await MessageService().addMessage(
-        user: authProvider.user,
-        isFromUser: true,
-        product: widget.product,
-        message: messageController.text,
-      );
-
-      setState(() {
-        widget.product = UnitializedProductModel();
-        messageController.text = '';
-      });
-    }
-
     header() {
       return PreferredSize(
         preferredSize: Size.fromHeight(70),
@@ -149,33 +148,33 @@ class _DetailChatPageState extends State<DetailChatPage> {
       );
     }
 
-    Widget content() {
+    Widget content(UserModel user) {
       return StreamBuilder<List<MessageModel>>(
-          stream: MessageService()
-              .getMessagesByUserId(userId: authProvider.user.id),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultMargin,
-                ),
-                children: snapshot.data!
-                    .map((MessageModel message) => ChatBubble(
-                          isSender: message.isFromUser,
-                          text: message.message,
-                          product: message.product,
-                        ))
-                    .toList(),
-              );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          });
+        stream: MessageService().getMessagesByUserId(userId: user.id),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView(
+              padding: EdgeInsets.symmetric(
+                horizontal: defaultMargin,
+              ),
+              children: snapshot.data!
+                  .map((MessageModel message) => ChatBubble(
+                        isSender: message.isFromUser,
+                        text: message.message,
+                        product: message.product,
+                      ))
+                  .toList(),
+            );
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      );
     }
 
-    Widget chatInput() {
+    Widget chatInput(UserModel user) {
       return Container(
         margin: EdgeInsets.all(20),
         child: Column(
@@ -212,7 +211,9 @@ class _DetailChatPageState extends State<DetailChatPage> {
                 ),
                 SizedBox(width: 20),
                 GestureDetector(
-                  onTap: handleAddMessage,
+                  onTap: () async {
+                    handleAddMessage(user);
+                  },
                   child: Image.asset(
                     'assets/button_send.png',
                     width: 45,
@@ -225,11 +226,21 @@ class _DetailChatPageState extends State<DetailChatPage> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: backgroundColor3,
-      appBar: header(),
-      bottomNavigationBar: chatInput(),
-      body: content(),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Scaffold(
+            backgroundColor: backgroundColor3,
+            appBar: header(),
+            bottomNavigationBar: chatInput(state.user),
+            body: content(state.user),
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 }

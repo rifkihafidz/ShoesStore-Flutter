@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/providers/product_provider.dart';
 import 'package:shamo_frontend/theme.dart';
 import 'package:shamo_frontend/widgets/product_card.dart';
@@ -14,55 +15,47 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     ProductProvider productProvider = Provider.of<ProductProvider>(context);
 
-    Widget header() {
-      return BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthLoggedIn) {
-            return Container(
-              margin: EdgeInsets.only(
-                top: defaultMargin,
-                right: defaultMargin,
-                left: defaultMargin,
-              ),
-              child: Row(
+    Widget header(UserModel user) {
+      return Container(
+        margin: EdgeInsets.only(
+          top: defaultMargin,
+          right: defaultMargin,
+          left: defaultMargin,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello, ${state.user.name}',
-                          style: primaryTextStyle.copyWith(
-                            fontWeight: semiBold,
-                            fontSize: 24,
-                          ),
-                        ),
-                        Text(
-                          '@${state.user.username}',
-                          style: subtitleTextStyle.copyWith(
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Hello, ${user.name}',
+                    style: primaryTextStyle.copyWith(
+                      fontWeight: semiBold,
+                      fontSize: 24,
                     ),
                   ),
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(state.user.profilePhotoUrl),
-                      ),
+                  Text(
+                    '@${user.username}',
+                    style: subtitleTextStyle.copyWith(
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
-            );
-          } else {
-            return SizedBox();
-          }
-        },
+            ),
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: NetworkImage(user.profilePhotoUrl),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -237,15 +230,24 @@ class HomePage extends StatelessWidget {
       );
     }
 
-    return ListView(
-      children: [
-        header(),
-        categories(),
-        popularProductsTitle(),
-        popularProducts(),
-        newArrivalsTitle(),
-        newArrivals(),
-      ],
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return ListView(
+            children: [
+              header(state.user),
+              categories(),
+              popularProductsTitle(),
+              popularProducts(),
+              newArrivalsTitle(),
+              newArrivals(),
+            ],
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

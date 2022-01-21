@@ -1,9 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/models/product_model.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/pages/detail_chat_page.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
 import 'package:shamo_frontend/providers/cart_provider.dart';
 import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
@@ -43,40 +45,6 @@ class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     CartProvider cartProvider = Provider.of<CartProvider>(context);
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-
-    handleWishlist() async {
-      var isWishlistExist = await WishlistService()
-          .checkWishlist(user: authProvider.user, product: widget.product);
-      if (isWishlistExist == true) {
-        await WishlistService()
-            .deleteWishlist(user: authProvider.user, product: widget.product);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: alertColor,
-            content: Text(
-              'Item removed from wishlist.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      } else {
-        await WishlistService()
-            .addWishlist(user: authProvider.user, product: widget.product);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: secondaryColor,
-            content: Text(
-              'Items added to wishlist.',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      }
-      setState(() {
-        widget.isWishlist = !widget.isWishlist;
-      });
-    }
 
     Future<void> showSuccessDialog() async {
       return showDialog(
@@ -241,7 +209,7 @@ class _ProductPageState extends State<ProductPage> {
       );
     }
 
-    Widget content() {
+    Widget content(UserModel user) {
       int index = -1;
 
       return Container(
@@ -285,8 +253,37 @@ class _ProductPageState extends State<ProductPage> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      handleWishlist();
+                    onTap: () async {
+                      var isWishlistExist = await WishlistService()
+                          .checkWishlist(user: user, product: widget.product);
+                      if (isWishlistExist == true) {
+                        await WishlistService().deleteWishlist(
+                            user: user, product: widget.product);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: alertColor,
+                            content: Text(
+                              'Item removed from wishlist.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      } else {
+                        await WishlistService()
+                            .addWishlist(user: user, product: widget.product);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: secondaryColor,
+                            content: Text(
+                              'Items added to wishlist.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      }
+                      setState(() {
+                        widget.isWishlist = !widget.isWishlist;
+                      });
                     },
                     child: Image.asset(
                       widget.isWishlist
@@ -446,14 +443,23 @@ class _ProductPageState extends State<ProductPage> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: backgroundColor6,
-      body: ListView(
-        children: [
-          header(),
-          content(),
-        ],
-      ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Scaffold(
+            backgroundColor: backgroundColor6,
+            body: ListView(
+              children: [
+                header(),
+                content(state.user),
+              ],
+            ),
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

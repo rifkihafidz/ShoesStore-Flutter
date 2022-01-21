@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/theme.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -8,72 +9,58 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget header() {
-      return BlocConsumer<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthInitial) {
-            Navigator.pushNamedAndRemoveUntil(
-                context, '/sign-in', (route) => false);
-          }
-        },
-        builder: (context, state) {
-          if (state is AuthLoggedIn) {
-            return AppBar(
-              backgroundColor: backgroundColor1,
-              automaticallyImplyLeading: false,
-              elevation: 0,
-              flexibleSpace: SafeArea(
-                child: Container(
-                  padding: EdgeInsets.all(
-                    defaultMargin,
+    Widget header(UserModel user) {
+      return AppBar(
+        backgroundColor: backgroundColor1,
+        automaticallyImplyLeading: false,
+        elevation: 0,
+        flexibleSpace: SafeArea(
+          child: Container(
+            padding: EdgeInsets.all(
+              defaultMargin,
+            ),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: Image.network(
+                    user.profilePhotoUrl,
+                    width: 64,
                   ),
-                  child: Row(
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipOval(
-                        child: Image.network(
-                          state.user.profilePhotoUrl,
-                          width: 64,
+                      Text(
+                        'Hello, ${user.name}',
+                        style: primaryTextStyle.copyWith(
+                          fontWeight: semiBold,
+                          fontSize: 24,
                         ),
                       ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hello, ${state.user.name}',
-                              style: primaryTextStyle.copyWith(
-                                fontWeight: semiBold,
-                                fontSize: 24,
-                              ),
-                            ),
-                            Text(
-                              '@${state.user.username}',
-                              style: subtitleTextStyle.copyWith(
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () async {
-                          context.read<AuthBloc>().add(AuthLogout());
-                        },
-                        child: Image.asset(
-                          'assets/button_exit.png',
-                          width: 20,
+                      Text(
+                        '@${user.username}',
+                        style: subtitleTextStyle.copyWith(
+                          fontSize: 16,
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            );
-          } else {
-            return SizedBox();
-          }
-        },
+                GestureDetector(
+                  onTap: () async {
+                    context.read<AuthBloc>().add(AuthLogout());
+                  },
+                  child: Image.asset(
+                    'assets/button_exit.png',
+                    width: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -146,11 +133,26 @@ class ProfilePage extends StatelessWidget {
       );
     }
 
-    return Column(
-      children: [
-        header(),
-        content(),
-      ],
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitial) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/sign-in', (route) => false);
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Column(
+            children: [
+              header(state.user),
+              content(),
+            ],
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }

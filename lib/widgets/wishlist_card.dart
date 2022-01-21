@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
 import 'package:shamo_frontend/models/product_model.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/services/wishlist_service.dart';
 import 'package:shamo_frontend/theme.dart';
 
@@ -13,11 +14,8 @@ class WishlistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
-
-    deleteWishlist() async {
-      await WishlistService()
-          .deleteWishlist(user: authProvider.user, product: product);
+    deleteWishlist(UserModel user) async {
+      await WishlistService().deleteWishlist(user: user, product: product);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: alertColor,
@@ -69,14 +67,22 @@ class WishlistCard extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              deleteWishlist();
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthLoggedIn) {
+                return GestureDetector(
+                  onTap: () async {
+                    deleteWishlist(state.user);
+                  },
+                  child: Image.asset(
+                    'assets/button_wishlist_blue.png',
+                    width: 34,
+                  ),
+                );
+              } else {
+                return SizedBox();
+              }
             },
-            child: Image.asset(
-              'assets/button_wishlist_blue.png',
-              width: 34,
-            ),
           ),
         ],
       ),

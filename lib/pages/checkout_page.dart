@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:shamo_frontend/providers/auth_provider.dart';
+import 'package:shamo_frontend/bloc/auth/auth_bloc.dart';
+import 'package:shamo_frontend/models/user_model.dart';
 import 'package:shamo_frontend/providers/cart_provider.dart';
 import 'package:shamo_frontend/providers/transaction_provider.dart';
 import 'package:shamo_frontend/theme.dart';
@@ -22,15 +24,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
     CartProvider cartProvider = Provider.of<CartProvider>(context);
     TransactionProvider transactionProvider =
         Provider.of<TransactionProvider>(context);
-    AuthProvider authProvider = Provider.of<AuthProvider>(context);
 
-    handleCheckout() async {
+    handleCheckout(UserModel user) async {
       setState(() {
         isLoading = true;
       });
 
-      if (await transactionProvider.checkOut(authProvider.user.token,
-          cartProvider.carts, cartProvider.totalPrice())) {
+      if (await transactionProvider.checkOut(
+          user.token, cartProvider.carts, cartProvider.totalPrice())) {
         cartProvider.carts = [];
         Navigator.pushNamedAndRemoveUntil(
             context, '/checkout-success', (route) => false);
@@ -58,7 +59,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       );
     }
 
-    Widget content() {
+    Widget content(UserModel user) {
       return ListView(
         padding: EdgeInsets.symmetric(
           horizontal: defaultMargin,
@@ -287,7 +288,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   width: double.infinity,
                   height: 50,
                   child: TextButton(
-                    onPressed: handleCheckout,
+                    onPressed: () {
+                      handleCheckout(user);
+                    },
                     style: TextButton.styleFrom(
                       backgroundColor: primaryColor,
                       shape: RoundedRectangleBorder(
@@ -307,10 +310,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: backgroundColor3,
-      appBar: header(),
-      body: content(),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoggedIn) {
+          return Scaffold(
+            backgroundColor: backgroundColor3,
+            appBar: header(),
+            body: content(state.user),
+          );
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }
